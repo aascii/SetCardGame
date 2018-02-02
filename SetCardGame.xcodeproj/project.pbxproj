@@ -12,6 +12,9 @@
 		CEB33CFB201FD39800925273 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CEB33CF9201FD39800925273 /* Main.storyboard */; };
 		CEB33CFD201FD39800925273 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CEB33CFC201FD39800925273 /* Assets.xcassets */; };
 		CEB33D00201FD39800925273 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CEB33CFE201FD39800925273 /* LaunchScreen.storyboard */; };
+		CEB33D0A201FD70600925273 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB33D09201FD70600925273 /* Card.swift */; };
+		CEB33D0C201FD97600925273 /* Deck.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB33D0B201FD97600925273 /* Deck.swift */; };
+		CEFE764520212F8D0009E4E7 /* SetGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEFE764420212F8D0009E4E7 /* SetGame.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +25,9 @@
 		CEB33CFC201FD39800925273 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CEB33CFF201FD39800925273 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		CEB33D01201FD39800925273 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CEB33D09201FD70600925273 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
+		CEB33D0B201FD97600925273 /* Deck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deck.swift; sourceTree = "<group>"; };
+		CEFE764420212F8D0009E4E7 /* SetGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetGame.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,14 +60,25 @@
 		CEB33CF4201FD39800925273 /* SetCardGame */ = {
 			isa = PBXGroup;
 			children = (
-				CEB33CF5201FD39800925273 /* AppDelegate.swift */,
 				CEB33CF7201FD39800925273 /* ViewController.swift */,
+				CEB33D09201FD70600925273 /* Card.swift */,
+				CEB33D0B201FD97600925273 /* Deck.swift */,
 				CEB33CF9201FD39800925273 /* Main.storyboard */,
-				CEB33CFC201FD39800925273 /* Assets.xcassets */,
-				CEB33CFE201FD39800925273 /* LaunchScreen.storyboard */,
+				CEFE764420212F8D0009E4E7 /* SetGame.swift */,
+				CEB33D07201FD3D700925273 /* Supporting Files */,
 				CEB33D01201FD39800925273 /* Info.plist */,
 			);
 			path = SetCardGame;
+			sourceTree = "<group>";
+		};
+		CEB33D07201FD3D700925273 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				CEB33CF5201FD39800925273 /* AppDelegate.swift */,
+				CEB33CFC201FD39800925273 /* Assets.xcassets */,
+				CEB33CFE201FD39800925273 /* LaunchScreen.storyboard */,
+			);
+			path = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -74,6 +91,7 @@
 				CEB33CEE201FD39800925273 /* Sources */,
 				CEB33CEF201FD39800925273 /* Frameworks */,
 				CEB33CF0201FD39800925273 /* Resources */,
+				CEB33D08201FD49200925273 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -131,11 +149,30 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		CEB33D08201FD49200925273 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\nswiftlint\nelse\necho \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		CEB33CEE201FD39800925273 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CEB33D0C201FD97600925273 /* Deck.swift in Sources */,
+				CEB33D0A201FD70600925273 /* Card.swift in Sources */,
+				CEFE764520212F8D0009E4E7 /* SetGame.swift in Sources */,
 				CEB33CF8201FD39800925273 /* ViewController.swift in Sources */,
 				CEB33CF6201FD39800925273 /* AppDelegate.swift in Sources */,
 			);
