@@ -245,19 +245,42 @@
                                     <action selector="startNewGame:" destination="BYZ-38-t0r" eventType="touchUpInside" id="V0x-1U-LpW"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Score: 0" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UfA-xb-nHt">
+                                <rect key="frame" x="16" y="348" width="288" height="48"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="40"/>
+                                <color key="textColor" red="0.1711889546" green="0.32906879690000002" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="MmA-5i-7IE">
+                                <rect key="frame" x="16" y="280" width="288" height="60"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="40"/>
+                                <state key="normal" title="Draw 3 cards"/>
+                                <connections>
+                                    <action selector="drawCards:" destination="BYZ-38-t0r" eventType="touchUpInside" id="RTL-dh-tMS"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="0.39285714285714285" green="1" blue="0.39285714285714285" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="MmA-5i-7IE" firstAttribute="top" relation="greaterThanOrEqual" secondItem="MI6-qi-Dvt" secondAttribute="bottom" constant="8" symbolic="YES" id="4ip-yU-5Ks"/>
+                            <constraint firstItem="MmA-5i-7IE" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="6Up-53-0EQ"/>
+                            <constraint firstItem="UfA-xb-nHt" firstAttribute="top" secondItem="MmA-5i-7IE" secondAttribute="bottom" constant="8" symbolic="YES" id="H3h-GX-0cS"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="R3Y-t8-Sg8" secondAttribute="trailing" constant="16" id="Lkg-YZ-qOb"/>
                             <constraint firstItem="R3Y-t8-Sg8" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="P4e-Vj-fKs"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="UfA-xb-nHt" secondAttribute="trailing" constant="16" id="QBy-0t-rhI"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="R3Y-t8-Sg8" secondAttribute="bottom" constant="16" id="Xpj-ak-wiB"/>
+                            <constraint firstItem="UfA-xb-nHt" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="cir-Cq-xfL"/>
                             <constraint firstItem="MI6-qi-Dvt" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="16" id="cq2-XC-Ocq"/>
+                            <constraint firstItem="R3Y-t8-Sg8" firstAttribute="top" secondItem="UfA-xb-nHt" secondAttribute="bottom" constant="8" symbolic="YES" id="iF1-gA-uYl"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="MI6-qi-Dvt" secondAttribute="trailing" constant="16" id="qOb-aw-BPm"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="MmA-5i-7IE" secondAttribute="trailing" constant="16" id="rvh-4T-dg6"/>
                             <constraint firstItem="MI6-qi-Dvt" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="vL4-a2-U8j"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
+                        <outlet property="scoreLabel" destination="UfA-xb-nHt" id="NMT-1M-ZUA"/>
                         <outletCollection property="cardButtons" destination="1nO-Ji-POv" collectionClass="NSMutableArray" id="ecC-Ur-aic"/>
                         <outletCollection property="cardButtons" destination="WtJ-ds-cw1" collectionClass="NSMutableArray" id="bix-w9-Kiv"/>
                         <outletCollection property="cardButtons" destination="3x2-8j-dfk" collectionClass="NSMutableArray" id="lMC-LI-CkV"/>

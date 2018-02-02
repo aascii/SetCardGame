@@ -16,16 +16,31 @@ class ViewController: UIViewController {
         super.viewDidLoad()
     }
 
+    @IBOutlet weak var scoreLabel: UILabel!
+
     @IBAction func startNewGame(_ sender: UIButton) {
         if game != nil {
             game = nil
         }
         game = SetGame()
         for button in game!.tabula.indices {
-            drawCardButton(for: button, at: button)
+            drawCardForButton(for: button, at: button)
         }
         for button in 12..<24 {
             cardButtons[button].isHidden = true
+        }
+//        forceEndGame()
+    }
+
+    @IBAction func drawCards(_ sender: UIButton) {
+        if cardButtons.contains(where: { $0.isHidden }) {
+            game!.deal()
+            updateViewFromModel()
+        } else {
+            if game!.matchIdentified {
+                game!.deal()
+                updateViewFromModel()
+            }
         }
     }
 
@@ -49,7 +64,7 @@ class ViewController: UIViewController {
             if endGame != nil, endGame == true {
                 cardButtons[buttonIndex].isHidden = true
             } else {
-                drawCardButton(for: card, at: buttonIndex)
+                drawCardForButton(for: card, at: buttonIndex)
             }
             buttonIndex += 1
         }
@@ -79,7 +94,7 @@ class ViewController: UIViewController {
 
     let cardShaderHatchAlpha = CGFloat(0.15)
 
-    private func drawCardButton(for card: Array<Card>.Index, at button: Array<UIButton>.Index) {
+    private func drawCardForButton(for card: Array<Card>.Index, at button: Array<UIButton>.Index) {
         cardButtons[button].isHidden = false
         cardButtons[button].backgroundColor = #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1)
         cardButtons[button].layer.cornerRadius = 8.0
@@ -132,6 +147,25 @@ class ViewController: UIViewController {
             cardButtons[button].layer.borderColor = UIColor.yellow.cgColor
         } else {
             cardButtons[button].layer.borderColor = UIColor.white.cgColor
+        }
+    }
+
+    // debug function to help end game testing
+    private func forceEndGame() {
+        game!.matchedCards = [Card]()
+        for _ in 1...22 {
+            game!.selectedCards = nil
+            game!.select(card: game!.tabula[2])
+            game!.select(card: game!.tabula[5])
+            game!.select(card: game!.tabula[11])
+            for index in game!.selectedCards!.indices {
+                game!.matchedCards?.append(game!.selectedCards![index])
+                let cardToRemoveFromPlay = game!.tabula.index(of: game!.selectedCards![index])
+                if let cardToAdd = game!.deck.draw() {
+                    game!.tabula[cardToRemoveFromPlay!] = cardToAdd
+                }
+            }
+            game!.selectedCards = nil
         }
     }
 }
