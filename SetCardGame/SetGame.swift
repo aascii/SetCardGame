@@ -27,17 +27,18 @@ class SetGame {
         if selectedCards?.count == 3 {
             checkForSetMatch()
             selectedCards = nil
-        }
-        for remaining in 1...3 {
-            if let card = deck.draw() {
-                tabula.append(card)
-            } else {
-                if remaining > 1 {
-                    print("ERROR - deck count is mismanaged in deal()")
+        } else {
+            for remaining in 1...3 {
+                if let card = deck.draw() {
+                    tabula.append(card)
                 } else {
-                    // remove next line after testing
-                    print("DEBUG - empty deck in deal()")
-                    break
+                    if remaining > 1 {
+                        print("ERROR - deck count is mismanaged in deal()")
+                    } else {
+                        // remove next line after testing
+                        print("DEBUG - empty deck in deal()")
+                        break
+                    }
                 }
             }
         }
@@ -47,7 +48,7 @@ class SetGame {
 
         if selectedCards == nil {
             selectedCards = [Card]()
-            selectedCards?.append(card)
+            selectedCards!.append(card)
         } else {
             switch selectedCards!.count {
             case 1..<3:
@@ -96,6 +97,10 @@ class SetGame {
                         }
                         for index in selectedCards!.indices {
                             matchedCards?.append(selectedCards![index])
+                            let cardToRemoveFromPlay = tabula.index(of: selectedCards![index])
+                            if let cardToAdd = deck.draw() {
+                                tabula[cardToRemoveFromPlay!] = cardToAdd
+                            }
                         }
                     }
                 }

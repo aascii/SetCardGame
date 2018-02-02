@@ -14,22 +14,6 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // model tests - remember to set deck back to private in SetGame
-//        let testgame = SetGame()
-//        for _ in 1...4 {
-//            print("\(testgame.tabula[testgame.tabula.count.arc4random])")
-//        }
-//        print("Deck: \(testgame.deck.cards.count), Table: \(testgame.tabula.count)")
-//        testgame.deal()
-//        print("Deck: \(testgame.deck.cards.count), Table: \(testgame.tabula.count)")
-//        print("Selected: \(testgame.selectedCards), Matched: \(testgame.matchedCards)")
-//        let testCard = testgame.tabula[testgame.tabula.count.arc4random]
-//        print("Testcard: \(testCard)")
-//        testgame.select(card: testCard)
-//        print("Selected: \(testgame.selectedCards), Matched: \(testgame.matchedCards)")
-//        testgame.select(card: testCard)
-//        print("Selected: \(testgame.selectedCards), Matched: \(testgame.matchedCards)")
     }
 
     @IBAction func startNewGame(_ sender: UIButton) {
@@ -38,18 +22,38 @@ class ViewController: UIViewController {
         }
         game = SetGame()
         for button in game!.tabula.indices {
-            drawNewCardButton(for: button)
+            drawCardButton(for: button, at: button)
         }
-//        updateViewFromModel()
+        for button in 12..<24 {
+            cardButtons[button].isHidden = true
+        }
     }
 
-    @IBOutlet var cardButtons: [UIButton]!
+    @IBOutlet var cardButtons: [UIButton]! {
+        didSet {
+            for button in cardButtons.indices {
+                cardButtons[button].isHidden = true
+            }
+        }
+    }
 
-//    private func updateViewFromModel() {
-//        for card in cardButtons.indices {
-//            
-//        }
-//    }
+    @IBAction func cardButtonSelect(_ sender: UIButton) {
+        game?.select(card: game!.tabula[cardButtons.index(of: sender)!])
+        updateViewFromModel()
+    }
+
+    private func updateViewFromModel() {
+        var buttonIndex = 0
+        for card in game!.tabula.indices {
+            let endGame = game!.matchedCards?.contains(game!.tabula[card])
+            if endGame != nil, endGame == true {
+                cardButtons[buttonIndex].isHidden = true
+            } else {
+                drawCardButton(for: card, at: buttonIndex)
+            }
+            buttonIndex += 1
+        }
+    }
 
     enum Symbol: String {
         case one = "▲"
@@ -57,14 +61,12 @@ class ViewController: UIViewController {
         case three = "■"
     }
 
-    enum Color: Int {
-        case one = 1
-        case two = 2
-        case three = 3
+    enum Color {
+        case one
+        case two
+        case three
+        case four
     }
-
-    let cardColors = [Color.one.rawValue: UIColor.green, Color.two.rawValue: UIColor.purple,
-                      Color.three.rawValue: UIColor.red]
 
     enum Shader: Int {
         case one = 1
@@ -77,52 +79,60 @@ class ViewController: UIViewController {
 
     let cardShaderHatchAlpha = CGFloat(0.15)
 
-    private func drawNewCardButton(for button: Array<Card>.Index) {
+    private func drawCardButton(for card: Array<Card>.Index, at button: Array<UIButton>.Index) {
+        cardButtons[button].isHidden = false
         cardButtons[button].backgroundColor = #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1)
         cardButtons[button].layer.cornerRadius = 8.0
         var buttonTitle: String
         var buttonTitleAttributes = [NSAttributedStringKey: Any]()
 
         // build the symbol string for the button
-        switch game?.tabula[button].symbol {
+        switch game?.tabula[card].symbol {
         case .one?: buttonTitle = Symbol.one.rawValue
         case .two?: buttonTitle = Symbol.two.rawValue
         case .three?: buttonTitle = Symbol.three.rawValue
         default: buttonTitle = "!"  // must be a bug!
         }
-        if game!.tabula[button].number > 1 {
+        if game!.tabula[card].number > 1 {
             let repeatingSymbol = buttonTitle
-            for _ in 2...game!.tabula[button].number {
+            for _ in 2...game!.tabula[card].number {
                 buttonTitle += repeatingSymbol
             }
         }
 
         // prepare the symbol color for the button
         let commonColor: UIColor
-        switch game?.tabula[button].color {
-        case .one?:
-            commonColor = cardColors[Color.one.rawValue]!
-        case .two?:
-            commonColor = cardColors[Color.two.rawValue]!
-        case .three?:
-            commonColor = cardColors[Color.three.rawValue]!
-        default: commonColor = UIColor.black  // bug
+        switch game!.tabula[card].color {
+        case .one: commonColor = Color.one.rawValue
+        case .two: commonColor = Color.two.rawValue
+        case .three: commonColor = Color.three.rawValue
         }
         buttonTitleAttributes[.strokeColor] = commonColor
 
         // prepare the symbol shading for the button
-        switch game?.tabula[button].shade {
-        case .one?:
+        switch game!.tabula[card].shade {
+        case .one:
             buttonTitleAttributes[.strokeWidth] = cardShaders[Shader.one.rawValue]!
             buttonTitleAttributes[.foregroundColor] = commonColor.withAlphaComponent(1.0)
-        case .two?:
+        case .two:
             buttonTitleAttributes[.strokeWidth] = cardShaders[Shader.two.rawValue]!
             buttonTitleAttributes[.foregroundColor] = commonColor.withAlphaComponent(cardShaderHatchAlpha)
-        case .three?: buttonTitleAttributes[.strokeWidth] = cardShaders[Shader.three.rawValue]!
-        default: buttonTitleAttributes[.strokeWidth] = 15.0  // bug
+        case .three:
+            buttonTitleAttributes[.strokeWidth] = cardShaders[Shader.three.rawValue]!
         }
         let buttonAttributedString = NSAttributedString(string: buttonTitle, attributes: buttonTitleAttributes)
+
+        // apply the mapped card to this button view
         cardButtons[button].setAttributedTitle(buttonAttributedString, for: UIControlState.normal)
+
+        // apply button outline if this is a selected card
+        cardButtons[button].layer.borderWidth = 3.0
+        let cardSelected = game!.selectedCards?.contains(game!.tabula[card])
+        if cardSelected != nil, cardSelected == true {
+            cardButtons[button].layer.borderColor = UIColor.yellow.cgColor
+        } else {
+            cardButtons[button].layer.borderColor = UIColor.white.cgColor
+        }
     }
 }
 
@@ -134,6 +144,30 @@ extension Int {
             return -Int(arc4random_uniform(UInt32(abs(self))))
         } else {
             return 0
+        }
+    }
+}
+
+// here we allow our display Color enum to retrieve UIColor rawValues
+// this is where to customize the card colors
+extension ViewController.Color: RawRepresentable {
+    typealias RawValue = UIColor
+
+    init?(rawValue: RawValue) {
+        switch rawValue {
+        case UIColor.green: self = .one
+        case UIColor.purple: self = .two
+        case UIColor.red: self = .three
+        default: self = .four     // would indicate a bug
+        }
+    }
+
+    public var rawValue: RawValue {
+        switch self {
+        case .one: return UIColor.green
+        case .two: return UIColor.purple
+        case .three: return UIColor.red
+        default: return UIColor.black    // only used as an error condition
         }
     }
 }
