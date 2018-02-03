@@ -18,6 +18,14 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var scoreLabel: UILabel!
 
+    var score: Int {
+        if let value = game?.points {
+            return value
+        } else {
+            return 0
+        }
+    }
+
     @IBOutlet weak var startNewGameLabel: UIButton! {
         didSet {
             startNewGameLabel.layer.cornerRadius = 16.0
@@ -29,6 +37,7 @@ class ViewController: UIViewController {
             game = nil
         }
         game = SetGame()
+        game!.points = 0
         for button in game!.tabula.indices {
             drawCardForButton(for: button, at: button)
         }
@@ -36,7 +45,7 @@ class ViewController: UIViewController {
             cardButtons[button].isHidden = true
         }
         drawCardsLabel.isHidden = false
-//        forceEndGame()
+        updateViewFromModel()
     }
 
     @IBOutlet weak var drawCardsLabel: UIButton! {
@@ -82,6 +91,7 @@ class ViewController: UIViewController {
             }
             buttonIndex += 1
         }
+        scoreLabel.text = "Score: \(score)"
     }
 
     enum Symbol: String {
@@ -168,24 +178,6 @@ class ViewController: UIViewController {
         }
     }
 
-    // debug function to help end game testing
-    private func forceEndGame() {
-        game!.matchedCards = [Card]()
-        for _ in 1...22 {
-            game!.selectedCards = nil
-            game!.select(card: game!.tabula[2])
-            game!.select(card: game!.tabula[5])
-            game!.select(card: game!.tabula[11])
-            for index in game!.selectedCards!.indices {
-                game!.matchedCards?.append(game!.selectedCards![index])
-                let cardToRemoveFromPlay = game!.tabula.index(of: game!.selectedCards![index])
-                if let cardToAdd = game!.deck.draw() {
-                    game!.tabula[cardToRemoveFromPlay!] = cardToAdd
-                }
-            }
-            game!.selectedCards = nil
-        }
-    }
 }
 
 extension Int {

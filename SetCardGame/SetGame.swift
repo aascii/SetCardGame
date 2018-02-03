@@ -9,10 +9,12 @@
 import Foundation
 
 class SetGame {
-    // after testing endgame, deck and tabula should be private(set)
-    var deck = Deck()
 
-    var tabula = [Card]()
+    private(set) var deck = Deck()
+
+    private(set) var tabula = [Card]()
+
+    var points = 0
 
     var selectedCards: [Card]?
 
@@ -54,6 +56,7 @@ class SetGame {
         for _ in 1...12 {
             tabula.append(deck.draw()!)
         }
+        points = 0
     }
 
     func deal() {
@@ -88,8 +91,14 @@ class SetGame {
                 if self.selectedCards!.contains(card) {
                     let cardToUnselect = self.selectedCards!.index(of: card)
                     self.selectedCards!.remove(at: cardToUnselect!)
+                    points -= 1
                 } else {
                     self.selectedCards!.append(card)
+                }
+                if self.matchIdentified {
+                    points += 5
+                } else if selectedCards!.count == 3 {
+                    points -= 3
                 }
             case 3:
                 performMatchOperations()
