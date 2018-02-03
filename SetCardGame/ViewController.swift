@@ -18,6 +18,12 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var scoreLabel: UILabel!
 
+    @IBOutlet weak var startNewGameLabel: UIButton! {
+        didSet {
+            startNewGameLabel.layer.cornerRadius = 16.0
+        }
+    }
+
     @IBAction func startNewGame(_ sender: UIButton) {
         if game != nil {
             game = nil
@@ -29,19 +35,26 @@ class ViewController: UIViewController {
         for button in 12..<24 {
             cardButtons[button].isHidden = true
         }
+        drawCardsLabel.isHidden = false
 //        forceEndGame()
     }
 
+    @IBOutlet weak var drawCardsLabel: UIButton! {
+        didSet {
+            drawCardsLabel.isHidden = true
+            drawCardsLabel.layer.cornerRadius = 16.0
+        }
+    }
+
     @IBAction func drawCards(_ sender: UIButton) {
-        if cardButtons.contains(where: { $0.isHidden }) {
+        if game!.matchIdentified {
             game!.deal()
-            updateViewFromModel()
         } else {
-            if game!.matchIdentified {
+            if cardButtons.contains(where: { $0.isHidden }) {
                 game!.deal()
-                updateViewFromModel()
             }
         }
+        updateViewFromModel()
     }
 
     @IBOutlet var cardButtons: [UIButton]! {
@@ -63,6 +76,7 @@ class ViewController: UIViewController {
             let endGame = game!.matchedCards?.contains(game!.tabula[card])
             if endGame != nil, endGame == true {
                 cardButtons[buttonIndex].isHidden = true
+                drawCardsLabel.isHidden = true
             } else {
                 drawCardForButton(for: card, at: buttonIndex)
             }
@@ -96,7 +110,11 @@ class ViewController: UIViewController {
 
     private func drawCardForButton(for card: Array<Card>.Index, at button: Array<UIButton>.Index) {
         cardButtons[button].isHidden = false
-        cardButtons[button].backgroundColor = #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1)
+        if game!.matchIdentified, game!.selectedCards!.contains(game!.tabula[card]) {
+            cardButtons[button].backgroundColor = UIColor.yellow
+        } else {
+            cardButtons[button].backgroundColor = #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1)
+        }
         cardButtons[button].layer.cornerRadius = 8.0
         var buttonTitle: String
         var buttonTitleAttributes = [NSAttributedStringKey: Any]()

@@ -280,7 +280,9 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
+                        <outlet property="drawCardsLabel" destination="MmA-5i-7IE" id="Ygc-zc-XSJ"/>
                         <outlet property="scoreLabel" destination="UfA-xb-nHt" id="NMT-1M-ZUA"/>
+                        <outlet property="startNewGameLabel" destination="R3Y-t8-Sg8" id="G3a-md-s47"/>
                         <outletCollection property="cardButtons" destination="1nO-Ji-POv" collectionClass="NSMutableArray" id="ecC-Ur-aic"/>
                         <outletCollection property="cardButtons" destination="WtJ-ds-cw1" collectionClass="NSMutableArray" id="bix-w9-Kiv"/>
                         <outletCollection property="cardButtons" destination="3x2-8j-dfk" collectionClass="NSMutableArray" id="lMC-LI-CkV"/>
