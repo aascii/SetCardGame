@@ -120,11 +120,21 @@ class ViewController: UIViewController {
 
     private func drawCardForButton(for card: Array<Card>.Index, at button: Array<UIButton>.Index) {
         cardButtons[button].isHidden = false
-        if game!.matchIdentified, game!.selectedCards!.contains(game!.tabula[card]) {
+
+        // determine and set background based on set "match" possibilities
+        let matchExists = game!.matchIdentified
+        let selection: [Card]?  = game!.selectedCards
+
+        if matchExists, selection!.contains(game!.tabula[card]) {
             cardButtons[button].backgroundColor = UIColor.yellow
         } else {
-            cardButtons[button].backgroundColor = #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1)
+            if selection != nil, selection!.count == 3, !matchExists, selection!.contains(game!.tabula[card]) {
+                cardButtons[button].backgroundColor = UIColor.orange
+            } else {
+                cardButtons[button].backgroundColor = #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1)
+            }
         }
+
         cardButtons[button].layer.cornerRadius = 8.0
         var buttonTitle: String
         var buttonTitleAttributes = [NSAttributedStringKey: Any]()
@@ -177,9 +187,9 @@ class ViewController: UIViewController {
             cardButtons[button].layer.borderColor = UIColor.white.cgColor
         }
     }
-
 }
 
+// extension used in model as well
 extension Int {
     var arc4random: Int {
         if self > 0 {

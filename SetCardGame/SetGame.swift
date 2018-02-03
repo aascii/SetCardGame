@@ -16,6 +16,8 @@ class SetGame {
 
     var points = 0
 
+    private var startTime: Date?
+
     var selectedCards: [Card]?
 
     var matchedCards: [Card]?
@@ -57,6 +59,7 @@ class SetGame {
             tabula.append(deck.draw()!)
         }
         points = 0
+        startTime = Date()
     }
 
     func deal() {
@@ -81,7 +84,6 @@ class SetGame {
     }
 
     func select(card: Card) {
-
         if selectedCards == nil {
             selectedCards = [Card]()
             selectedCards!.append(card)
@@ -95,10 +97,26 @@ class SetGame {
                 } else {
                     self.selectedCards!.append(card)
                 }
+                let currentTime = Date()
+                let turnTime = currentTime.timeIntervalSince(startTime!)
+                var scoreFactor: Int
                 if self.matchIdentified {
-                    points += 5
-                } else if selectedCards!.count == 3 {
-                    points -= 3
+                    switch turnTime {
+                    case 0..<5.0: scoreFactor = 8
+                    case 5.0..<15.0: scoreFactor = 4
+                    case 15.0..<25.0: scoreFactor = 2
+                    default: scoreFactor = 1
+                    }
+                    points += (5 * scoreFactor)
+                } else {
+                    if selectedCards!.count == 3 {
+                        switch turnTime {
+                        case 0..<0.05: scoreFactor = 8
+                        case 0.05..<15.0: scoreFactor = 1
+                        default: scoreFactor = 2
+                        }
+                        points -= (8 * scoreFactor)
+                    }
                 }
             case 3:
                 performMatchOperations()
@@ -108,6 +126,7 @@ class SetGame {
                 selectedCards = nil
                 selectedCards = [Card]()
                 selectedCards?.append(card)
+                startTime = Date()
             }
         }
     }
