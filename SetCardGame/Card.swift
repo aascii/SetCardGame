@@ -18,6 +18,8 @@ struct Card: CustomStringConvertible {
     let color: Color
     let shade: Shade
 
+    static let allNumbers = [1, 2, 3]
+
     enum Symbol: Int {
         case one = 1
         case two = 2

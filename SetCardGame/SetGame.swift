@@ -54,6 +54,73 @@ class SetGame {
         return false
     }
 
+    // computer will spy on whether player could make a match given available cards in play
+    // this function would need updating if there were ever more than three values to support
+    private func searchForMatch() -> Card? {
+        for trailingSearchIndex in tabula.startIndex..<(tabula.endIndex - 2) {
+            let cardOne = tabula[trailingSearchIndex]
+            for leadingSearchIndex in (trailingSearchIndex + 1)..<(tabula.endIndex - 1) {
+                let cardTwo = tabula[leadingSearchIndex]
+                // use first two cards to determine what third card would need to be for a matched set
+                let necessaryNumber: Int
+                let necessarySymbol: Card.Symbol
+                let necessaryColor: Card.Color
+                let necessaryShade: Card.Shade
+
+                let numberShouldMatch = cardOne.number == cardTwo.number ? true : false
+                let symbolShouldMatch = cardOne.symbol == cardTwo.symbol ? true : false
+                let colorShouldMatch = cardOne.color == cardTwo.color ? true : false
+                let shadeShouldMatch = cardOne.shade == cardTwo.shade ? true : false
+
+                if !numberShouldMatch {
+                    var possibleNumbers = Card.allNumbers
+                    possibleNumbers.remove(at: possibleNumbers.index(of: cardOne.number)!)
+                    possibleNumbers.remove(at: possibleNumbers.index(of: cardTwo.number)!)
+                    necessaryNumber = possibleNumbers[0]
+                } else {
+                    necessaryNumber = cardOne.number
+                }
+                if !symbolShouldMatch {
+                    var possibleSymbols = Card.Symbol.all
+                    possibleSymbols.remove(at: possibleSymbols.index(of: cardOne.symbol)!)
+                    possibleSymbols.remove(at: possibleSymbols.index(of: cardTwo.symbol)!)
+                    necessarySymbol = possibleSymbols[0]
+                } else {
+                    necessarySymbol = cardOne.symbol
+                }
+                if !colorShouldMatch {
+                    var possibleColors = Card.Color.all
+                    possibleColors.remove(at: possibleColors.index(of: cardOne.color)!)
+                    possibleColors.remove(at: possibleColors.index(of: cardTwo.color)!)
+                    necessaryColor = possibleColors[0]
+                } else {
+                    necessaryColor = cardOne.color
+                }
+                if !shadeShouldMatch {
+                    var possibleShades = Card.Shade.all
+                    possibleShades.remove(at: possibleShades.index(of: cardOne.shade)!)
+                    possibleShades.remove(at: possibleShades.index(of: cardTwo.shade)!)
+                    necessaryShade = possibleShades[0]
+                } else {
+                    necessaryShade = cardOne.shade
+                }
+                let cardThree =
+                    Card(number: necessaryNumber, symbol: necessarySymbol, color: necessaryColor, shade: necessaryShade)
+
+                // now see if the necessary card is in play
+                for matchIndex in (leadingSearchIndex + 1)..<tabula.endIndex where tabula[matchIndex] == cardThree {
+                    return tabula[matchIndex]
+                }
+            }
+        }
+        return nil
+    }
+
+    var matchPossible: Bool {
+        let found = searchForMatch()
+        return found != nil ? true : false
+    }
+
     init() {
         for _ in 1...12 {
             tabula.append(deck.draw()!)
@@ -67,6 +134,9 @@ class SetGame {
             performMatchOperations()
             selectedCards = nil
         } else {
+            if matchPossible {
+                points -= 15
+            }
             for remaining in 1...3 {
                 if let card = deck.draw() {
                     tabula.append(card)
