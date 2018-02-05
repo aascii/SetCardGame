@@ -12,10 +12,6 @@ class ViewController: UIViewController {
 
     private lazy var game: SetGame? = SetGame()
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-
     @IBOutlet weak var scoreLabel: UILabel!
 
     var score: Int {
@@ -45,6 +41,7 @@ class ViewController: UIViewController {
             cardButtons[button].isHidden = true
         }
         drawCardsLabel.isHidden = false
+        hintButtonLabel.isHidden = false
         updateViewFromModel()
     }
 
@@ -76,6 +73,7 @@ class ViewController: UIViewController {
 
     @IBAction func cardButtonSelect(_ sender: UIButton) {
         game?.select(card: game!.tabula[cardButtons.index(of: sender)!])
+        provideHint = false
         updateViewFromModel()
     }
 
@@ -113,15 +111,32 @@ class ViewController: UIViewController {
         case three = 3
     }
 
-    let cardShaders = [Shader.one.rawValue: -3.0, Shader.two.rawValue: -3.0,
+    private let cardShaders = [Shader.one.rawValue: -3.0, Shader.two.rawValue: -3.0,
                        Shader.three.rawValue: 5.0]
 
-    let cardShaderHatchAlpha = CGFloat(0.15)
+    private let cardShaderHatchAlpha = CGFloat(0.15)
+
+    private var provideHint = false
+
+    @IBAction func hintButton(_ sender: UIButton) {
+        if provideHint == false, game!.matchPossible {
+            provideHint = true
+            game!.points -= 10
+            updateViewFromModel()
+        }
+    }
+
+    @IBOutlet weak var hintButtonLabel: UIButton! {
+        didSet {
+            hintButtonLabel.isHidden = true
+            hintButtonLabel.layer.cornerRadius = 16.0
+        }
+    }
 
     private func drawCardForButton(for card: Array<Card>.Index, at button: Array<UIButton>.Index) {
         cardButtons[button].isHidden = false
 
-        // determine and set background based on set "match" possibilities
+        // determine and set background based on set "match" possibilities or hinting
         let matchExists = game!.matchIdentified
         let selection: [Card]?  = game!.selectedCards
 
@@ -132,6 +147,21 @@ class ViewController: UIViewController {
                 cardButtons[button].backgroundColor = UIColor.orange
             } else {
                 cardButtons[button].backgroundColor = #colorLiteral(red: 0.9999960065, green: 1, blue: 1, alpha: 1)
+            }
+        }
+        if provideHint, game!.matchPossible {
+            for _ in game!.hintCards!.indices where game!.hintCards!.contains(game!.tabula[card]) {
+                if game!.selectedCards == nil {
+                    cardButtons[button].backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
+                    provideHint = false
+                    break
+                } else {
+                    if !game!.selectedCards!.contains(game!.tabula[card]) {
+                        cardButtons[button].backgroundColor = #colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)
+                        provideHint = false
+                        break
+                    }
+                }
             }
         }
 

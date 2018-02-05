@@ -56,7 +56,7 @@ class SetGame {
 
     // computer will spy on whether player could make a match given available cards in play
     // this function would need updating if there were ever more than three values to support
-    private func searchForMatch() -> Card? {
+    private func searchForMatch() -> [Card]? {
         for trailingSearchIndex in tabula.startIndex..<(tabula.endIndex - 2) {
             let cardOne = tabula[trailingSearchIndex]
             for leadingSearchIndex in (trailingSearchIndex + 1)..<(tabula.endIndex - 1) {
@@ -109,16 +109,18 @@ class SetGame {
 
                 // now see if the necessary card is in play
                 for matchIndex in (leadingSearchIndex + 1)..<tabula.endIndex where tabula[matchIndex] == cardThree {
-                    return tabula[matchIndex]
+                    return [tabula[trailingSearchIndex], tabula[leadingSearchIndex], tabula[matchIndex]]
                 }
             }
         }
         return nil
     }
 
+    private(set) var hintCards: [Card]?
+
     var matchPossible: Bool {
-        let found = searchForMatch()
-        return found != nil ? true : false
+        hintCards = searchForMatch()
+        return hintCards != nil ? true : false
     }
 
     init() {
