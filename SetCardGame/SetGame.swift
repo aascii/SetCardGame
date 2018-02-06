@@ -14,13 +14,33 @@ class SetGame {
 
     private(set) var tabula = [Card]()
 
+    weak var tabulaDelegate: TabulaDelegate?
+
+    var opponentMode = 0
+
+    private(set) var opponentState = OpponentState.waiting {
+        didSet {
+            opponentDelegate?.didReceiveOpponentUpdate(status: opponentState)
+        }
+    }
+
+    weak var opponentDelegate: OpponentDelegate?
+
+    private lazy var opponentTimer = Timer()
+
+    private let firstTurn = 27.0
+    private let normalWait = 17.0
+    private let normalWarn = 17.0
+
+    private(set) var opponentPoints = 0
+
     var points = 0
 
     private var startTime: Date?
 
-    var selectedCards: [Card]?
+    private(set) var selectedCards: [Card]?
 
-    var matchedCards: [Card]?
+    private var matchedCards: [Card]?
 
     var matchIdentified: Bool {
         if selectedCards?.count == 3 {
@@ -129,6 +149,21 @@ class SetGame {
         }
         points = 0
         startTime = Date()
+        opponentMode = 0
+    }
+
+    init(opponent mode: Bool) {
+        if mode {
+            opponentMode = 1
+        } else {
+            opponentMode = 0
+        }
+        for _ in 1...12 {
+            tabula.append(deck.draw()!)
+        }
+        points = 0
+        startTime = Date()
+        opponentTimer = Timer.scheduledTimer(withTimeInterval: firstTurn, repeats: false, block: changeOpponentState)
     }
 
     func deal() {
@@ -137,19 +172,19 @@ class SetGame {
             selectedCards = nil
         } else {
             if matchPossible {
-                points -= 15
+                if opponentMode == 0 { points -= 15 }
+            } else {
+                if opponentMode == 1 {
+                opponentTimer =
+                    Timer.scheduledTimer(withTimeInterval: normalWait, repeats: false, block: changeOpponentState)
+                }
             }
-            for remaining in 1...3 {
+            for _ in 1...3 {
                 if let card = deck.draw() {
                     tabula.append(card)
                 } else {
-                    if remaining > 1 {
-                        print("ERROR - deck count is mismanaged in deal()")
-                    } else {
-                        // remove next line after testing
-                        print("DEBUG - empty deck in deal()")
-                        break
-                    }
+                    if !matchPossible { opponentState = (opponentPoints >= points) ? .winner : .loser }
+                    break
                 }
             }
         }
@@ -165,7 +200,7 @@ class SetGame {
                 if self.selectedCards!.contains(card) {
                     let cardToUnselect = self.selectedCards!.index(of: card)
                     self.selectedCards!.remove(at: cardToUnselect!)
-                    points -= 1
+                    if opponentMode == 0 { points -= 1 }
                 } else {
                     self.selectedCards!.append(card)
                 }
@@ -173,21 +208,30 @@ class SetGame {
                 let turnTime = currentTime.timeIntervalSince(startTime!)
                 var scoreFactor: Int
                 if self.matchIdentified {
-                    switch turnTime {
-                    case 0..<5.0: scoreFactor = 8
-                    case 5.0..<15.0: scoreFactor = 4
-                    case 15.0..<25.0: scoreFactor = 2
-                    default: scoreFactor = 1
+                    if opponentMode == 0 {
+                        switch turnTime {
+                        case 0..<5.0: scoreFactor = 8
+                        case 5.0..<15.0: scoreFactor = 4
+                        case 15.0..<25.0: scoreFactor = 2
+                        default: scoreFactor = 1
+                        }
+                        points += (5 * scoreFactor)
+                    } else {
+                        opponentTimer.invalidate()
+                        points += 1
+                        opponentTimer = Timer.scheduledTimer(withTimeInterval: normalWait, repeats: false,
+                                                             block: changeOpponentState)
                     }
-                    points += (5 * scoreFactor)
                 } else {
                     if selectedCards!.count == 3 {
-                        switch turnTime {
-                        case 0..<0.05: scoreFactor = 8
-                        case 0.05..<15.0: scoreFactor = 1
-                        default: scoreFactor = 2
+                        if opponentMode == 0 {
+                            switch turnTime {
+                            case 0..<0.05: scoreFactor = 8
+                            case 0.05..<15.0: scoreFactor = 1
+                            default: scoreFactor = 2
+                            }
+                            points -= (8 * scoreFactor)
                         }
-                        points -= (8 * scoreFactor)
                     }
                 }
             case 3:
@@ -201,6 +245,7 @@ class SetGame {
                 startTime = Date()
             }
         }
+        if deck.cards.isEmpty, !matchPossible { opponentState = (opponentPoints >= points) ? .winner : .loser }
     }
 
     private func performMatchOperations() {
@@ -213,8 +258,83 @@ class SetGame {
                 let cardToRemoveFromPlay = tabula.index(of: selectedCards![index])
                 if let cardToAdd = deck.draw() {
                     tabula[cardToRemoveFromPlay!] = cardToAdd
+                } else {
+                    tabula.remove(at: cardToRemoveFromPlay!)
+                    tabulaDelegate?.didReceiveTabulaUpdate(endPosition: tabula.endIndex)
                 }
             }
+        }
+    }
+}
+
+// must be able to radio to delegates that tabula has less cards in it now
+protocol TabulaDelegate: class {
+    func didReceiveTabulaUpdate(endPosition: Array<Card>.Index)
+}
+
+// Computer Opponent extensions below here
+
+// must be able to radio to delegates that opponent is in a new state
+protocol OpponentDelegate: class {
+    func didReceiveOpponentUpdate(status: SetGame.OpponentState)
+}
+
+extension SetGame {
+
+    enum OpponentState {
+        case waiting
+        case warning
+        case winner
+        case loser
+    }
+
+    private func changeOpponentState(timer: Timer) {
+        timer.invalidate()
+        switch opponentState {
+        case .waiting:
+            if matchPossible {
+                opponentState = .warning
+                opponentTimer =
+                    Timer.scheduledTimer(withTimeInterval: normalWarn, repeats: false, block: changeOpponentState)
+            }
+        case .warning:
+            if matchPossible {
+                if matchedCards == nil {
+                    matchedCards = [Card]()
+                }
+                if hintCards != nil {
+                    for index in hintCards!.indices {
+                        // we can mitigate race condition by disrupting player - if you snooze, you lose!
+                        if selectedCards != nil {
+                            if selectedCards!.contains(hintCards![index]) {
+                                selectedCards = nil
+                            }
+                        }
+                        matchedCards!.append(hintCards![index])
+                        let cardToRemoveFromPlay = tabula.index(of: hintCards![index])
+                        if let cardToAdd = deck.draw() {
+                            tabula[cardToRemoveFromPlay!] = cardToAdd
+                        } else {
+                            tabula.remove(at: cardToRemoveFromPlay!)
+                            tabulaDelegate?.didReceiveTabulaUpdate(endPosition: tabula.endIndex)
+                        }
+                    }
+                    selectedCards = nil
+                    opponentPoints += 1
+                    if matchPossible {
+                        opponentTimer = Timer.scheduledTimer(withTimeInterval: normalWait, repeats: false,
+                                                             block: changeOpponentState)
+                    } else {
+                        if deck.cards.isEmpty { opponentState = (opponentPoints >= points) ? .winner : .loser }
+                    }
+                }     // else oops, player just outraced us!  restart of opponent Timer is done in deal() or select()
+            }
+            if deck.cards.isEmpty, !matchPossible {
+                opponentState = (opponentPoints >= points) ? .winner : .loser
+            } else {
+                opponentState = .waiting
+            }
+        default: break
         }
     }
 }

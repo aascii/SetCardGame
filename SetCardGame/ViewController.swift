@@ -14,6 +14,8 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var scoreLabel: UILabel!
 
+    @IBOutlet weak var opponentScoreLabel: UILabel!
+
     var score: Int {
         if let value = game?.points {
             return value
@@ -22,9 +24,23 @@ class ViewController: UIViewController {
         }
     }
 
-    @IBOutlet weak var startNewGameLabel: UIButton! {
+    var opponentScore: Int {
+        if let value = game?.opponentPoints {
+            return value
+        } else {
+            return 0
+        }
+    }
+
+    @IBOutlet weak var startNewSoloGameLabel: UIButton! {
         didSet {
-            startNewGameLabel.layer.cornerRadius = 16.0
+            startNewSoloGameLabel.layer.cornerRadius = 16.0
+        }
+    }
+
+    @IBOutlet weak var startNewOpponentGameLabel: UIButton! {
+        didSet {
+            startNewOpponentGameLabel.layer.cornerRadius = 16.0
         }
     }
 
@@ -32,7 +48,17 @@ class ViewController: UIViewController {
         if game != nil {
             game = nil
         }
-        game = SetGame()
+        if sender.titleLabel?.text == "Solo Game" {
+            game = SetGame()
+            hintButtonLabel.isHidden = false
+            opponentScoreLabel.isHidden = true
+        } else {
+            game = SetGame(opponent: true)
+            hintButtonLabel.isHidden = true
+            opponentScoreLabel.isHidden = false
+            game!.opponentDelegate = self
+        }
+        game!.tabulaDelegate = self
         game!.points = 0
         for button in game!.tabula.indices {
             drawCardForButton(for: button, at: button)
@@ -41,7 +67,6 @@ class ViewController: UIViewController {
             cardButtons[button].isHidden = true
         }
         drawCardsLabel.isHidden = false
-        hintButtonLabel.isHidden = false
         updateViewFromModel()
     }
 
@@ -80,16 +105,23 @@ class ViewController: UIViewController {
     private func updateViewFromModel() {
         var buttonIndex = 0
         for card in game!.tabula.indices {
-            let endGame = game!.matchedCards?.contains(game!.tabula[card])
-            if endGame != nil, endGame == true {
-                cardButtons[buttonIndex].isHidden = true
+            if game!.deck.cards.isEmpty {
                 drawCardsLabel.isHidden = true
-            } else {
-                drawCardForButton(for: card, at: buttonIndex)
             }
+            drawCardForButton(for: card, at: buttonIndex)
             buttonIndex += 1
         }
         scoreLabel.text = "Score: \(score)"
+        if game!.opponentMode == 1 {
+            let opponentEmoji: String
+            switch game!.opponentState {
+            case .waiting: opponentEmoji = "🤔"
+            case .warning: opponentEmoji = "😁"
+            case .winner: opponentEmoji = "😎"
+            case .loser: opponentEmoji = "😭"
+            }
+            opponentScoreLabel.text = "Vs \(opponentEmoji): \(game!.opponentPoints)"
+        }
     }
 
     enum Symbol: String {
@@ -216,6 +248,21 @@ class ViewController: UIViewController {
         } else {
             cardButtons[button].layer.borderColor = UIColor.white.cgColor
         }
+    }
+}
+
+// conform to tabula radio station
+extension ViewController: TabulaDelegate {
+    func didReceiveTabulaUpdate(endPosition: Array<Card>.Index) {
+        cardButtons[endPosition].isHidden = true
+        updateViewFromModel()
+    }
+}
+
+// conform to opponent radio station
+extension ViewController: OpponentDelegate {
+    func didReceiveOpponentUpdate(status: SetGame.OpponentState) {
+        updateViewFromModel()
     }
 }
 
